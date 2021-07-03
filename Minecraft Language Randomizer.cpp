@@ -7,14 +7,15 @@
 
 using namespace std;
 
-string toLowerCase(string);
+string toLowerCase(string inString);
+
 
 int main() {
 	ifstream inputFile;
 	ofstream outputFile;
-	string inputFileName;
-	int skipToKey = 3;
-	string languageCode, languageName, languageRegion;
+	string inputFileName, languageCode, languageName, languageRegion;
+	bool modFile;
+	int packFormat;
 	do {
 		cout << "Please input your base language file's file name: ";
 		cin >> inputFileName;
@@ -23,6 +24,23 @@ int main() {
 			cout << "Invalid file name. Please try again.\n";
 		}
 	} while (!inputFile.good());
+	cout << "Please input the pack format number: ";
+	cin >> packFormat;
+	bool goodResponse = false;
+	string response;
+	do {
+		cout << "Is this a mod's language file (y/n)? ";
+		cin >> response;
+		if (toLowerCase(response) == "y" || toLowerCase(response) == "yes") {
+			modFile = true;
+			goodResponse = true;
+		}
+		else if (toLowerCase(response) == "n" || toLowerCase(response) == "no") {
+			modFile = false;
+			goodResponse = true;
+		}
+		if (!goodResponse) { cout << "Invalid response. Please try again.\n"; }
+	} while (!goodResponse);
 	cout << "Please input your desired language code (for example, ran_dom or en_us): ";
 	cin >> languageCode;
 	languageCode = toLowerCase(languageCode);
@@ -30,169 +48,95 @@ int main() {
 	cin >> languageName;
 	cout << "Please input your desired language region (for example, Random or US): ";
 	cin >> languageRegion;
-	for (int i = 0; i <= time(0) % 10000; i++) {
-		rand();
+	for (int i = 0; i <= time(0) % 10000; i++) { rand(); } // Randomizies the randomization seed based on the current time
+	string readFileLine;
+	getline(inputFile, readFileLine); 
+	getline(inputFile, readFileLine);
+	int skipToKey = readFileLine.find('"') + 1; // Determines at which character the translation key begins for each line
+	inputFile.close();
+	inputFile.clear();
+	inputFile.open(inputFileName);
+	string translationKeys[10000], translatedNames[10000], randomizedTranslations[10000];
+	for (int i = 0; i < 10000; i++) {
+		translationKeys[i] = "&";
+		translatedNames[i] = "&";
+		randomizedTranslations[i] = "&";
 	}
-	if (inputFileName != "en_us.json") { skipToKey += 2; }
-	int goodKeys[5000];
 	int goodKeyCount = 0;
-	for (int i = 0; i < 5000; i++) {
-		goodKeys[i] = 0;
-	}
 	cout << "Gathering data from original file.\nCounting number of lines of translations.\n";
 	int lines = 0;
-	string throwAway;
-	getline(inputFile, throwAway);
+	getline(inputFile, readFileLine); //Goes past the first bracket.
+	string translationKey, translatedName, tempTranslation;
+	getline(inputFile, tempTranslation, '"');
+	translationKey = tempTranslation + '"';
+	getline(inputFile, tempTranslation, '"');
+	translationKey += tempTranslation + '"';
 	do {
+		getline(inputFile, translatedName);
+		if (translatedName.find(',') == 4294967295) { translatedName += ','; }
+		translationKeys[lines] = translationKey;
+		translatedNames[lines] = translatedName + "\n";
+		if (translationKey.find("chat.") == skipToKey) {  // Excluded the chat text so that in game chat can actually function
+			translationKeys[lines] = "&";
+			translatedNames[lines] = "&";
+			goodKeyCount -= 1;
+		}
+		else if (translationKey.find("pack.") == skipToKey) { // Mostly arbitrary exclusion.
+			translationKeys[lines] = "&";
+			translatedNames[lines] = "&";
+			goodKeyCount -= 1;
+		}
+		else if (translationKey.find("language.") == skipToKey) {  // Makes sure to avoid issues with language info getting put in twice
+			translationKeys[lines] = "&";
+			translatedNames[lines] = "&";
+			goodKeyCount -= 1;
+		}
 		lines++;
-		getline(inputFile, throwAway);
-		if (throwAway.find("block.minecraft") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("item.minecraft") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else  if (throwAway.find("entity.minecraft") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("deathScreen.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("container.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("merchant.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("menu.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("selectWorld.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("createWorld.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("options.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("death.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("effect.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("event.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("enchantment.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("gui.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("stat.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("itemGroup.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("inventory.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("subtitles.") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-		else if (throwAway.find("attribute.name") == skipToKey) {
-			goodKeys[lines - 4] = 1;
-			goodKeyCount++;
-		}
-	} while (!inputFile.eof());
+		goodKeyCount++;
+		getline(inputFile, tempTranslation, '"');
+		translationKey = tempTranslation + '"';
+		getline(inputFile, tempTranslation, '"');
+		translationKey += tempTranslation + '"';
+	} while (translationKey.find("}") != 0);
 	inputFile.close();
 	inputFile.clear();
 	cout << "The number of lines in the original translation file is " << lines << "." << endl;
-	cout << "Sorting keys into randomizable set.\n";
-	for (int i = 0; i <= time(0) % 312; i++) {
-		rand();
-	}
+	for (int i = 0; i <= time(0) % 312; i++) { rand(); } // More time-based seed randomization
 	cout << "There are " << goodKeyCount << " randomizable keys.\n";
-	cout << "Gathering translation keys and translated names from translation file." << endl;
-	inputFile.open(inputFileName);
-	string translationKeys[5000], translatedNames[5000];
-	for (int i = 0; i < lines - 9; i++) {
-		getline(inputFile, translationKeys[i], ':');
-		translationKeys[i] += ":";
-		getline(inputFile, translatedNames[i]);
-		translatedNames[i] += "\n";
-	}
-	int usedNumbersKeys[4809], usedNumbersNames[4809];
-	for (int i = 0; i < 4809; i++) {
-		usedNumbersKeys[i] = -1;
-		usedNumbersNames[i] = -1;
-	}
-	int keyChoice, nameChoice;
-	bool keyGood, nameGood;
-	inputFile.close();
-	inputFile.clear();
-	outputFile.open(languageCode + ".json");
-	outputFile << "{\n  \"language.name\": \"" << languageName << "\",\n  \"language.region\": \"" << languageRegion << "\",\n";
-	outputFile << "  \"language.code\": \"" << languageCode << "\",\n";
 	cout << "Randomizing the translations.\n";
-	for (int i = 0; i < (goodKeyCount-7); i++) {
-		for (int i = 0; i <= time(0) % 10000; i++) {
-			rand();
-		}
-		if (rand() % 100 == 42) { cout << "."; }
+	int nameChoice;
+	bool goodName;
+	for (int i = 0; i < goodKeyCount; i++) {
+		for (int i = 0; i <= time(0) % 10000; i++) { rand(); } // Even more seed randomization
+		if (rand() % 100 == 42) { cout << "."; } // Pointless progress bar to make sure user can see program still working
 		do {
-			keyChoice = rand() % 4809;
-			keyGood = true;
-			for (int x = 0; x < i; x++) {
-				if (usedNumbersKeys[x] == keyChoice) { keyGood = false; }
-				else if (goodKeys[keyChoice] == 0) { keyGood = false; }
-			}
-		} while (!keyGood);
-		for (int i = 0; i <= time(0) % 10000; i++) {
-			rand();
-		}
-		do {
-			nameChoice = rand() % 4809;
-			nameGood = true;
-			for (int x = 0; x < i; x++) {
-				if (usedNumbersNames[x] == nameChoice) { nameGood = false; }
-				else if (goodKeys[nameChoice] == 0) { nameGood = false; }
-			}
-		} while (!nameGood);
-		usedNumbersKeys[i] = keyChoice;
-		usedNumbersNames[i] = nameChoice;
-		outputFile << translationKeys[keyChoice] << translatedNames[nameChoice];
+			goodName = true;
+			nameChoice = rand() % lines;
+			if (translatedNames[nameChoice].find('&') == 0) { goodName = false; }
+		} while (!goodName);
+		randomizedTranslations[i] = translatedNames[nameChoice];
+		translatedNames[nameChoice] = "&";
 	}
-	outputFile << "  \"menu.singleplayer\": \"Multiplayer\",\n";
-	outputFile << "  \"menu.multiplayer\": \"Singleplayer\"\n";
+	int currentKey = -1;
+	outputFile.open(languageCode + ".json");
+	outputFile << "{\n  ";
+	if (!modFile) {
+		outputFile << "\"language.name\": \"" << languageName << "\",\n  \"language.region\": \"" << languageRegion << "\",\n";
+		outputFile << "  \"language.code\": \"" << languageCode << "\",\n";
+	}
+	for (int i = 0; i < goodKeyCount; i++) {
+		do {
+			currentKey++;
+		} while (translationKeys[currentKey].find('&') == 0);
+		outputFile << translationKeys[currentKey] << randomizedTranslations[i];
+	}
+	outputFile << "  \"bryceio.garbage\": \"Ignore\"\n";
 	outputFile << "}";
 	outputFile.close();
 	cout << "\nRandomization complete!\n" << endl;
 	cout << "Generating \"pack.mcmeta\" file." << endl;
 	outputFile.open("pack.mcmeta");
-	outputFile << "{\n   \"pack\": {\n      \"pack_format\": 6,\n      \"description\": \"An almost completely randomized language pack.\"\n   },\n";
+	outputFile << "{\n   \"pack\": {\n      \"pack_format\":" << packFormat << ",\n      \"description\": \"An almost completely randomized language pack.\"\n   },\n";
 	outputFile << "   \"language\": {\n      \"" << languageCode << "\": {\n         \"name\": \"" << languageName << "\",\n         \"region\": \"" << languageRegion << "\",\n         \"bidirectional\": false\n";
 	outputFile << "         }\n   }\n}";
 	outputFile.close();
