@@ -4,6 +4,7 @@
 #include <iomanip>
 #include <random>
 #include <ctime>
+#include <algorithm>
 
 auto toLowerCase(std::string inString) -> std::string
 {
@@ -63,7 +64,6 @@ auto main() -> int
 	for (auto i = 0; i <= time(nullptr) % 10000; i++) rand();
 	// Randomizes the randomization seed based on the current time
 	std::string readFileLine;
-	getline(inputFile, readFileLine);
 	getline(inputFile, readFileLine);
 	auto skipToKey = readFileLine.find('"') + 1;
 	// Determines at which character the translation key begins for each line
