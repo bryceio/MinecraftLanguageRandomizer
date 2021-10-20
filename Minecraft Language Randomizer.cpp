@@ -6,21 +6,21 @@
 #include <ctime>
 #include <algorithm>
 
-auto toLowerCase(std::string inString) -> std::string
+std::string toLowerCase(std::string inString)
 {
 	std::transform(inString.begin(), inString.end(), inString.begin(),
-				   [](unsigned char const c) -> unsigned char
-				   { return static_cast<unsigned char>(std::tolower(c)); });
+		[](unsigned char const c) -> unsigned char
+	{ return static_cast<unsigned char>(tolower(c)); });
 	return inString;
 }
 
 
-auto main() -> int
+int main()
 {
 	std::ifstream inputFile;
 	std::ofstream outputFile;
 	std::string inputFileName, languageCode, languageName, languageRegion;
-	auto modFile = false;
+	bool modFile = false;
 	int packFormat;
 	do
 	{
@@ -29,11 +29,10 @@ auto main() -> int
 		inputFile.open(inputFileName);
 		if (!inputFile.good())
 			std::cout << "Invalid file name. Please try again." << std::endl;
-	}
-	while (!inputFile.good());
+	} while (!inputFile.good());
 	std::cout << "Please input the pack format number: ";
 	std::cin >> packFormat;
-	auto goodResponse = false;
+	bool goodResponse = false;
 	do
 	{
 		std::string response;
@@ -52,8 +51,7 @@ auto main() -> int
 		else
 			goodResponse = false;
 		if (!goodResponse) std::cout << "Invalid response. Please try again." << std::endl;
-	}
-	while (!goodResponse);
+	} while (!goodResponse);
 	std::cout << "Please input your desired language code (for example, ran_dom or en_us): ";
 	std::cin >> languageCode;
 	languageCode = toLowerCase(languageCode);
@@ -61,25 +59,25 @@ auto main() -> int
 	std::cin >> languageName;
 	std::cout << "Please input your desired language region (for example, Random or US): ";
 	std::cin >> languageRegion;
-	for (auto i = 0; i <= time(nullptr) % 10000; i++) rand();
+	for (int i = 0; i <= time(nullptr) % 10000; i++) rand();
 	// Randomizes the randomization seed based on the current time
 	std::string readFileLine;
 	getline(inputFile, readFileLine);
-	auto skipToKey = readFileLine.find('"') + 1;
+	int skipToKey = readFileLine.find('"') + 1;
 	// Determines at which character the translation key begins for each line
 	inputFile.close();
 	inputFile.clear();
 	inputFile.open(inputFileName);
 	std::string translationKeys[10000], translatedNames[10000], randomizedTranslations[10000];
-	for (auto i = 0; i < 10000; i++)
+	for (int i = 0; i < 10000; i++)
 	{
 		translationKeys[i] = "&";
 		translatedNames[i] = "&";
 		randomizedTranslations[i] = "&";
 	}
-	auto goodKeyCount = 0;
+	int goodKeyCount = 0;
 	std::cout << "Gathering data from original file.\nCounting number of lines of translations.\n";
-	auto lines = 0;
+	int lines = 0;
 	getline(inputFile, readFileLine); //Goes past the first bracket.
 	std::string translationKey, translatedName, tempTranslation;
 	getline(inputFile, tempTranslation, '"');
@@ -119,20 +117,19 @@ auto main() -> int
 		translationKey = tempTranslation + '"';
 		getline(inputFile, tempTranslation, '"');
 		translationKey += tempTranslation + '"';
-	}
-	while (translationKey.find("}") != 0);
+	} while (translationKey.find("}") != 0);
 	inputFile.close();
 	inputFile.clear();
 	std::cout << "The number of lines in the original translation file is " << lines << "." << std::endl;
-	for (auto i = 0; i <= time(nullptr) % 312; i++) rand();
+	for (int i = 0; i <= time(nullptr) % 312; i++) rand();
 	// More time-based seed randomization
 	std::cout << "There are " << goodKeyCount << " randomizable keys.\n";
 	std::cout << "Randomizing the translations.\n";
 	int nameChoice;
 	bool goodName;
-	for (auto i = 0; i < goodKeyCount; i++)
+	for (int i = 0; i < goodKeyCount; i++)
 	{
-		for (auto i = 0; i <= time(nullptr) % 10000; i++) rand();
+		for (int i = 0; i <= time(nullptr) % 10000; i++) rand();
 		// Even more seed randomization
 		if (rand() % 100 == 42) std::cout << ".";
 		// Pointless progress bar to make sure user can see program still working
@@ -141,8 +138,7 @@ auto main() -> int
 			goodName = true;
 			nameChoice = rand() % lines;
 			if (translatedNames[nameChoice].find('&') == 0) goodName = false;
-		}
-		while (!goodName);
+		} while (!goodName);
 		randomizedTranslations[i] = translatedNames[nameChoice];
 		translatedNames[nameChoice] = "&";
 	}
@@ -155,7 +151,7 @@ auto main() -> int
 			"\",\n";
 		outputFile << "  \"language.code\": \"" << languageCode << "\",\n";
 	}
-	for (auto i = 0; i < goodKeyCount; i++)
+	for (int i = 0; i < goodKeyCount; i++)
 	{
 		do
 			currentKey++;
