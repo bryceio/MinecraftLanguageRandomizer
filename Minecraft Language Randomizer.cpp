@@ -63,6 +63,7 @@ int main()
 	// Randomizes the randomization seed based on the current time
 	std::string readFileLine;
 	getline(inputFile, readFileLine);
+	getline(inputFile, readFileLine);
 	int skipToKey = readFileLine.find('"') + 1;
 	// Determines at which character the translation key begins for each line
 	inputFile.close();
